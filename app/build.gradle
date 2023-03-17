@@ -38,9 +38,9 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-    implementation 'com.google.android.exoplayer:exoplayer:2.10.3'
-    implementation 'com.google.android.exoplayer:exoplayer-core:2.10.3'
-//    implementation 'com.google.android.exoplayer:exoplayer-dash:2.X.X'
-    implementation 'com.google.android.exoplayer:exoplayer-hls:2.10.3'
-    implementation 'com.google.android.exoplayer:exoplayer-ui:2.10.3'
+    implementation "com.google.android.exoplayer:exoplayer:$demo_exoplayer_version"
+    implementation "com.google.android.exoplayer:exoplayer-core:$demo_exoplayer_version"
+//    implementation "com.google.android.exoplayer:exoplayer-dash:$demo_exoplayer_version"
+    implementation "com.google.android.exoplayer:exoplayer-hls:$demo_exoplayer_version"
+    implementation "com.google.android.exoplayer:exoplayer-ui:$demo_exoplayer_version"
 }
