@@ -10,8 +10,6 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.get
-import androidx.core.view.isEmpty
 import androidx.viewpager.widget.PagerAdapter
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.offline.Download
@@ -26,19 +24,19 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray
 import com.google.android.exoplayer2.ui.DebugTextViewHelper
 import com.google.android.exoplayer2.ui.DefaultTrackNameProvider
 import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_main.view.*
 import java.io.IOException
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
     private val uris = arrayOf(
-        Uri.parse("http://res.uquabc.com/HLS_Apple/all.m3u8"),
-        Uri.parse("https://content.jwplatform.com/manifests/IPYHGrEj.m3u8")
+        Uri.parse("https://content.jwplatform.com/manifests/IPYHGrEj.m3u8"),
+        Uri.parse("https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8"),
+        Uri.parse("https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8"),
+        Uri.parse("https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8"),
+        Uri.parse("https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8"),
     )
     private var downloadHelper: DownloadHelper? = null
     private var exoPlayer: SimpleExoPlayer? = null
@@ -54,13 +52,14 @@ class MainActivity : AppCompatActivity() {
         initViewPager()
         downloadTracker = (application as App).videoDownloadManager.downloadTracker
         initExoPlayer()
+        changeVideoBtn.text = "切换视频$uriIndex"
         changeVideoBtn.setOnClickListener {
-            changeVideoBtn.text = "切换视频$uriIndex"
-            uriIndex = if (uriIndex == 0) {
-                1
+            if (uriIndex < uris.size - 1) {
+                uriIndex++
             } else {
-                0
+                uriIndex = 0
             }
+            changeVideoBtn.text = "切换视频$uriIndex"
             exoPlayer?.release()
             debugTextViewHelper?.stop()
             initExoPlayer()
@@ -84,7 +83,10 @@ class MainActivity : AppCompatActivity() {
                 val layout = LinearLayout(this@MainActivity)
                 layout.orientation = LinearLayout.VERTICAL
                 layout.layoutParams =
-                    ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                    ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
                 if (position == 0) {
                     trackSelectContainer = layout
                 } else {
@@ -142,10 +144,17 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onTracksChanged(trackGroups: TrackGroupArray, trackSelections: TrackSelectionArray) {
+            override fun onTracksChanged(
+                trackGroups: TrackGroupArray,
+                trackSelections: TrackSelectionArray
+            ) {
                 val format = trackSelections.get(RENDERER_SUPPORT_NO_TRACKS)?.selectedFormat
                 runOnUiThread {
-                    Toast.makeText(this@MainActivity, "当前分辨率:${format?.width}x${format?.height}", Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        this@MainActivity,
+                        "当前分辨率:${format?.width}x${format?.height}",
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                 }
             }
@@ -158,7 +167,10 @@ class MainActivity : AppCompatActivity() {
     /**
      * 获取分辨率列表，点击切换
      */
-    private fun initTrackSelectBtn(trackSelector: DefaultTrackSelector, dataSourceFactory: DataSource.Factory) {
+    private fun initTrackSelectBtn(
+        trackSelector: DefaultTrackSelector,
+        dataSourceFactory: DataSource.Factory
+    ) {
         trackSelectContainer?.removeAllViews()
         val defaultTrackNameProvider = DefaultTrackNameProvider(resources)   //获取分辨率的名字
         val parameters = trackSelector.parameters
@@ -176,18 +188,32 @@ class MainActivity : AppCompatActivity() {
                         val layout = LinearLayout(this)
                         layout.orientation = LinearLayout.HORIZONTAL
                         val btn = Button(this)
-                        btn.text = defaultTrackNameProvider.getTrackName(group!!.getFormat(trackIndex))
+                        btn.text =
+                            defaultTrackNameProvider.getTrackName(group!!.getFormat(trackIndex))
                         btn.setOnClickListener {
-                            val builder: DefaultTrackSelector.ParametersBuilder? = parameters?.buildUpon()
+                            val builder: DefaultTrackSelector.ParametersBuilder? =
+                                parameters?.buildUpon()
                             builder?.clearSelectionOverrides()
-                            val selectionOverride = DefaultTrackSelector.SelectionOverride(groupIndex, trackIndex)
-                            builder?.setSelectionOverride(RENDERER_SUPPORT_NO_TRACKS, trackGroups, selectionOverride)
+                            val selectionOverride =
+                                DefaultTrackSelector.SelectionOverride(groupIndex, trackIndex)
+                            builder?.setSelectionOverride(
+                                RENDERER_SUPPORT_NO_TRACKS,
+                                trackGroups,
+                                selectionOverride
+                            )
                             trackSelector.setParameters(builder)
                         }
                         layout.addView(btn)
                         val btn1 = Button(this)
                         btn1.text = "点击下载"
-                        btn1.setOnClickListener { download(btn1, dataSourceFactory, groupIndex, trackIndex) }
+                        btn1.setOnClickListener {
+                            download(
+                                btn1,
+                                dataSourceFactory,
+                                groupIndex,
+                                trackIndex
+                            )
+                        }
                         layout.addView(btn1)
                         trackSelectContainer?.addView(layout)
                     }
@@ -197,7 +223,12 @@ class MainActivity : AppCompatActivity() {
     /**
      * 下载，一个uri只保存一种分辨率的文件
      */
-    private fun download(btn: Button, dataSourceFactory: DataSource.Factory, groupIndex: Int, trackIndex: Int) {
+    private fun download(
+        btn: Button,
+        dataSourceFactory: DataSource.Factory,
+        groupIndex: Int,
+        trackIndex: Int
+    ) {
         downloadHelper =
             DownloadHelper.forHls(uris[uriIndex], dataSourceFactory, DefaultRenderersFactory(this))
         downloadHelper?.prepare(object : DownloadHelper.Callback {
@@ -207,7 +238,8 @@ class MainActivity : AppCompatActivity() {
                     .forEach { periodIndex ->
                         downloadHelper!!.clearTrackSelections(periodIndex)
                         if (mappedTrackInfo != null) {
-                            val selectionOverride = DefaultTrackSelector.SelectionOverride(groupIndex, trackIndex)
+                            val selectionOverride =
+                                DefaultTrackSelector.SelectionOverride(groupIndex, trackIndex)
                             downloadHelper!!.addTrackSelectionForSingleRenderer(
                                 periodIndex,
                                 0,
@@ -269,7 +301,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startDownload(downloadRequest: DownloadRequest) {
-        DownloadService.sendAddDownload(this, VideoDownloadService::class.java, downloadRequest, false)
+        DownloadService.sendAddDownload(
+            this,
+            VideoDownloadService::class.java,
+            downloadRequest,
+            false
+        )
     }
 
     /**
