@@ -38,9 +38,18 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-    implementation "com.google.android.exoplayer:exoplayer:$demo_exoplayer_version"
-    implementation "com.google.android.exoplayer:exoplayer-core:$demo_exoplayer_version"
-//    implementation "com.google.android.exoplayer:exoplayer-dash:$demo_exoplayer_version"
-    implementation "com.google.android.exoplayer:exoplayer-hls:$demo_exoplayer_version"
-    implementation "com.google.android.exoplayer:exoplayer-ui:$demo_exoplayer_version"
+//    implementation "com.google.android.exoplayer:exoplayer:$demo_exoplayer_version"
+//    implementation "com.google.android.exoplayer:exoplayer-core:$demo_exoplayer_version"
+////    implementation "com.google.android.exoplayer:exoplayer-dash:$demo_exoplayer_version"
+//    implementation "com.google.android.exoplayer:exoplayer-hls:$demo_exoplayer_version"
+//    implementation "com.google.android.exoplayer:exoplayer-ui:$demo_exoplayer_version"
+
+    //Local dependencies for test target Version
+    implementation project(path: ':library')
+    implementation project(path: ':library-ui')
+//    implementation project(path: ':library-dash')
+//    implementation project(path: ':library-smoothstreaming')
+    implementation project(path: ':library-core')
+    implementation project(path: ':library-hls')
+    implementation project(path: ':library')
 }

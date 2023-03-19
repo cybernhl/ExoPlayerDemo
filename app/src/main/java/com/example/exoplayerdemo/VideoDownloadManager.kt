@@ -1,10 +1,10 @@
 package com.example.exoplayerdemo
 
 import android.content.Context
-import com.google.android.exoplayer2.database.DatabaseProvider
-import com.google.android.exoplayer2.database.ExoDatabaseProvider
-import com.google.android.exoplayer2.offline.DefaultDownloadIndex
-import com.google.android.exoplayer2.offline.DefaultDownloaderFactory
+//import com.google.android.exoplayer2.database.DatabaseProvider
+//import com.google.android.exoplayer2.database.ExoDatabaseProvider
+//import com.google.android.exoplayer2.offline.DefaultDownloadIndex
+//import com.google.android.exoplayer2.offline.DefaultDownloaderFactory
 import com.google.android.exoplayer2.offline.DownloadManager
 import com.google.android.exoplayer2.offline.DownloaderConstructorHelper
 import com.google.android.exoplayer2.scheduler.Requirements
@@ -22,24 +22,25 @@ class VideoDownloadManager(val context: Context) {
     private val DOWNLOAD_CONTENT_DIRECTORY = "downloads"
     private val userAgent = Util.getUserAgent(context, "ExoPlayerDemo")
 
-    val downloadManager: DownloadManager by lazy {
-        val downloadIndex = DefaultDownloadIndex(databaseProvider)
-        val downloaderConstructorHelper = DownloaderConstructorHelper(downloadCache, buildHttpDataSourceFactory)
-        val downloadManager = DownloadManager(
-            context, downloadIndex, DefaultDownloaderFactory(downloaderConstructorHelper)
-        )
-        downloadManager
-    }
+//    val downloadManager: DownloadManager by lazy {
+//        val downloadIndex = DefaultDownloadIndex(databaseProvider)
+//        val downloaderConstructorHelper = DownloaderConstructorHelper(downloadCache, buildHttpDataSourceFactory)
+//        val downloadManager = DownloadManager(
+//            context, downloadIndex, DefaultDownloaderFactory(downloaderConstructorHelper)
+//        )
+//        downloadManager
+//    }
 
-    val downloadTracker: VideoDownloadTracker by lazy {
-        val downloadTracker = VideoDownloadTracker(context, buildDataSourceFactory, downloadManager)
-        downloadTracker
-    }
+//    val downloadTracker: VideoDownloadTracker by lazy {
+//        val downloadTracker = VideoDownloadTracker(context, buildDataSourceFactory, downloadManager)
+//        downloadTracker
+//    }
 
-    private val databaseProvider: DatabaseProvider by lazy {
-        val p = ExoDatabaseProvider(context)
-        p
-    }
+    //FIXME 2.8.4 not
+//    private val databaseProvider: DatabaseProvider by lazy {
+//        val p = ExoDatabaseProvider(context)
+//        p
+//    }
 
     private val downloadDirectory: File by lazy {
         var directionality = context.getExternalFilesDir(null)
@@ -51,7 +52,8 @@ class VideoDownloadManager(val context: Context) {
 
     val downloadCache: Cache by lazy {
         val downloadContentDirectory = File(downloadDirectory, DOWNLOAD_CONTENT_DIRECTORY)
-        val downloadCache = SimpleCache(downloadContentDirectory, NoOpCacheEvictor(), databaseProvider)
+        val downloadCache = SimpleCache(downloadContentDirectory, NoOpCacheEvictor())
+//        val downloadCache = SimpleCache(downloadContentDirectory, NoOpCacheEvictor(), databaseProvider)
         downloadCache
     }
 
@@ -69,11 +71,11 @@ class VideoDownloadManager(val context: Context) {
         )
     }
 
-    val buildDataSourceFactory: DataSource.Factory by lazy {
-        val upstreamFactory = DefaultDataSourceFactory(context, buildHttpDataSourceFactory)
-        val factory = buildReadOnlyCacheDataSource(upstreamFactory, downloadCache)
-        factory
-    }
+//    val buildDataSourceFactory: DataSource.Factory by lazy {
+//        val upstreamFactory = DefaultDataSourceFactory(context, buildHttpDataSourceFactory)
+//        val factory = buildReadOnlyCacheDataSource(upstreamFactory, downloadCache)
+//        factory
+//    }
 
 
 }
