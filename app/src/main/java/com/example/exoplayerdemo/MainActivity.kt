@@ -24,6 +24,7 @@ import com.google.android.exoplayer2.ui.DebugTextViewHelper
 import com.google.android.exoplayer2.ui.DefaultTrackNameProvider
 import com.google.android.exoplayer2.upstream.DataSource
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private val TAG="MainActivity"
@@ -39,7 +40,8 @@ class MainActivity : AppCompatActivity() {
     private var downloadHelper: DownloadHelper? = null
     private var exoPlayer: SimpleExoPlayer? = null
     private var debugTextViewHelper: DebugTextViewHelper? = null
-//    private lateinit var downloadTracker: VideoDownloadTracker
+    private lateinit var downloadTracker: DownloadTracker
+    //    private lateinit var downloadTracker: VideoDownloadTracker
     private var uriIndex = 0
     private var trackSelectContainer: LinearLayout? = null
     private var downloadContainer: LinearLayout? = null
@@ -48,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initViewPager()
-//        downloadTracker = (application as App).videoDownloadManager.downloadTracker
+        downloadTracker = (application as App).videoDownloadManager.downloadTracker
         initExoPlayer()
         changeVideoBtn.text = "切换视频$uriIndex"
         changeVideoBtn.setOnClickListener {
@@ -121,8 +123,7 @@ class MainActivity : AppCompatActivity() {
     private fun initExoPlayer() {
         //轨道选择，包括音频轨道和视频轨道
         val trackSelector = DefaultTrackSelector()
-//        val dataSourceFactory = (application as App).videoDownloadManager.buildDataSourceFactory
-        val dataSourceFactory = (application as App).buildDataSourceFactory(null)
+        val dataSourceFactory = (application as App).videoDownloadManager.buildDataSourceFactory
         playerView.setControllerVisibilityListener { visibility ->
             Log.e(
                 TAG,
@@ -285,6 +286,7 @@ class MainActivity : AppCompatActivity() {
      * 下载，一个uri只保存一种分辨率的文件
      */
     private fun download(  btn: Button, dataSourceFactory: DataSource.Factory,  groupIndex: Int,  trackIndex: Int ) {
+        //FIXME 2.8.2 not DownloadHelper.forHls
 //        downloadHelper = DownloadHelper.forHls(uris[uriIndex], dataSourceFactory, DefaultRenderersFactory(this))
 //        downloadHelper?.prepare(object : DownloadHelper.Callback {
 //            override fun onPrepared(helper: DownloadHelper?) {
@@ -313,10 +315,11 @@ class MainActivity : AppCompatActivity() {
 //        })
 //
 //        //更新进度
-//        val timer = Timer()
-//        val timerTask = object : TimerTask() {
-//            override fun run() {
-//                val download = downloadTracker.getDownload(uris[uriIndex])
+        val timer = Timer()
+        val timerTask = object : TimerTask() {
+            override fun run() {
+                val download = downloadTracker.getDownload(uris[uriIndex])
+
 //
 //                when {
 //                    download?.state == Download.STATE_DOWNLOADING -> runOnUiThread {
@@ -337,17 +340,17 @@ class MainActivity : AppCompatActivity() {
 //                        timer.cancel()
 //                    }
 //                }
-//            }
-//        }
-//        var isRunTask = false
-//        downloadTracker.addListener(object : VideoDownloadTracker.Listener {
-//            override fun onDownloadsChanged() {
-//                if (!isRunTask) {
-//                    timer.schedule(timerTask, 1000, 1000)
-//                    isRunTask = true
-//                }
-//            }
-//        })
+            }
+        }
+        var isRunTask = false
+        downloadTracker.addListener(object : DownloadTracker.Listener {
+            override fun onDownloadsChanged() {
+                if (!isRunTask) {
+                    timer.schedule(timerTask, 1000, 1000)
+                    isRunTask = true
+                }
+            }
+        })
     }
 
 //
